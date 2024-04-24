@@ -1,10 +1,10 @@
 ---
-title: "Homework 4"
+title: "Homework 5"
 subtitle: "Research Methods, Spring 2024"
 author: "Taeyoung Yim"
 format:
   pdf:
-    output-file: "yim-t-hwk4-3"
+    output-file: "yim-t-hwk5-1"
     output-ext:  "pdf"
     header-includes:
       - \usepackage{float}
@@ -49,7 +49,7 @@ ggplot(direct_insurance_data, aes(x = factor(year), y = ins_direct)) +
 \vspace{.2in}
 \noindent 2. Discuss the reduction in direct purchase health insurance in later years. Can you list a couple of policies that might have affected the success of the direct purchase insurance market?<br>
 
-The reduction in direct purchase health insurance in later years could be attributed to key policies like the Affordable Care Act (ACA) and the expansion of Medicaid. The ACA's introduction of subsidized health insurance plans through marketplaces provided an alternative for individuals seeking coverage, potentially diminishing the appeal of direct purchase insurance. Additionally, the expansion of Medicaid eligibility under the ACA extended low-cost or free coverage to more individuals, reducing the need for direct purchase insurance among certain demographics. These policies aimed to increase access to affordable health insurance options and decrease the number of uninsured individuals, thus impacting the dynamics of the direct purchase insurance market.
+ACA and Medicaid expansion are the two policies that I can think of. Since theses policies makes healthcare more accessible for people, the direct purchase health insurance in later years can experience a reduction. 
 
 \newpage
 \vspace{.2in}
@@ -126,8 +126,9 @@ library(tidyverse)
 
 reg.dat <- data %>%
   filter(expand_year == 2014 | is.na(expand_year), !is.na(expand_ever)) %>%
-  mutate(post = (year >= 2014),
-         treat = post * expand_ever)
+  mutate(perc_unins = uninsured / adult_pop,
+        post = (year >= 2014),
+        treat = post * expand_ever)
 
 m.dd <- lm(perc_unins ~ post + expand_ever + treat, data = reg.dat)
 summary(m.dd)
@@ -143,10 +144,11 @@ library(fixest)
 
 reg.dat <- data %>%
   filter(expand_year == 2014 | is.na(expand_year), !is.na(expand_ever)) %>%
-  mutate(post = (year >= 2014),
+  mutate(perc_unins = uninsured / adult_pop,
+  post = (year >= 2014),
          treat = post * expand_ever)
 
-m.dd <- feols(perc_unins ~ post + expand_ever | state + year, data = reg.dat)
+m.dd <- feols(perc_unins ~ treat | State + year, data = reg.dat)
 
 summary(m.dd)
 ```
@@ -158,12 +160,15 @@ library(fixest)
 
 reg.dat <- data %>%
   filter(!is.na(expand_ever)) %>%
-  mutate(post = (year >= 2014),
+  mutate(perc_unins = uninsured / adult_pop
+  ,post = (year >= 2014),
          treat = post * expand_ever)
 
-m.dd <- feols(perc_unins ~ post + expand_ever | state + year, data = reg.dat)
+m.dd <- feols(perc_unins ~ treat | State + year, data = reg.dat)
 summary(m.dd)
 ```
+The result is different but not sure if it is significantly different. The major reason behind the difference is that the number of observations are different. 
+
 \newpage
 \vspace{.2in}
 \noindent 9.Provide an “event study” graph showing the effects of Medicaid expansion in each year. Use the specification that includes state and year fixed effects, limited to states that expanded in 2014 or never expanded.<br>
